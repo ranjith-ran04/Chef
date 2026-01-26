@@ -17,3 +17,7 @@ def load_and_preprocess(csv_path):
 if __name__ == "__main__":
     df = load_and_preprocess("../data/dishes.csv")
     print(df.head())
+
+
+
+
