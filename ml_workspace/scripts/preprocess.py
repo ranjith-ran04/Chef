@@ -10,14 +10,11 @@ def load_and_preprocess(csv_path):
     df = pd.read_csv(csv_path)
 
     df['ingredients'] = df['ingredients'].apply(clean_text)
-    df['dish'] = df['dish'].str.lower()
+    df['category'] = df['category'].str.lower().str.strip()
+    df['dish'] = df['dish'].str.lower().str.strip()
 
     return df
 
 if __name__ == "__main__":
     df = load_and_preprocess("../data/dishes.csv")
     print(df.head())
-
-
-
-
