@@ -1,38 +1,29 @@
-import joblib
-import re
+# ml_workspace/scripts/evaluate.py
 
-# Load artifacts
-model = joblib.load("../artifacts/model.pkl")
-vectorizer = joblib.load("../artifacts/vectorizer.pkl")
-label_encoder = joblib.load("../artifacts/label_encoder.pkl")
+import pickle
+import numpy as np
+from sklearn.metrics import classification_report, accuracy_score, confusion_matrix
 
-# Simple preprocessing function (same as training)
-def clean_text(text):
-    text = text.lower()
-    text = re.sub(r'[^a-zA-Z, ]', '', text)
-    return text
+ARTIFACTS_DIR = "backend/app/ml/artifacts"
 
-# Interactive loop
-print("🍽️ Dish Prediction Model")
-print("Type 'exit' to quit\n")
+def load_artifacts():
+    with open(f"{ARTIFACTS_DIR}/model.pkl", "rb") as f:
+        model = pickle.load(f)
+    with open(f"{ARTIFACTS_DIR}/vectorizer.pkl", "rb") as f:
+        vectorizer = pickle.load(f)
+    with open(f"{ARTIFACTS_DIR}/label_encoder.pkl", "rb") as f:
+        label_encoder = pickle.load(f)
+    return model, vectorizer, label_encoder
 
-while True:
-    category = input("Enter category: ")
-    if category.lower() == "exit":
-        break
+def evaluate(X_raw, y_true_labels):
+    model, vectorizer, label_encoder = load_artifacts()
+    X_vec = vectorizer.transform(X_raw)
+    y_encoded = label_encoder.transform(y_true_labels)
+    y_pred = model.predict(X_vec)
+    acc = accuracy_score(y_encoded, y_pred)
+    print(f"Accuracy: {acc:.4f}")
+    print(classification_report(y_encoded, y_pred, target_names=label_encoder.classes_))
+    return acc
 
-    ingredients = input("Enter ingredients (comma separated): ")
-    if ingredients.lower() == "exit":
-        break
-
-    # Preprocess input
-    category = category.lower().strip()
-    ingredients = clean_text(ingredients)
-    input_text = f"category {category} ingredients {ingredients}"
-
-    # Vectorize & predict
-    input_vec = vectorizer.transform([input_text])
-    pred = model.predict(input_vec)
-    dish_name = label_encoder.inverse_transform(pred)[0]
-
-    print(f"✅ Predicted Dish: {dish_name}\n")
+if __name__ == "__main__":
+    print("Run evaluate() with your test data arrays.")

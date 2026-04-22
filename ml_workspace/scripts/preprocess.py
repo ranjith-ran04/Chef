@@ -1,20 +1,27 @@
-import pandas as pd
+# ml_workspace/scripts/preprocess.py
+
 import re
+import pandas as pd
 
-def clean_text(text):
-    text = text.lower()
-    text = re.sub(r'[^a-zA-Z, ]', '', text)
-    return text
+STOPWORDS = {"a", "an", "the", "and", "or", "with", "of", "in", "on", "some"}
 
-def load_and_preprocess(csv_path):
-    df = pd.read_csv(csv_path)
+def normalize_ingredient(ingredient: str) -> str:
+    ingredient = ingredient.lower().strip()
+    ingredient = re.sub(r"[^a-z0-9\s]", "", ingredient)
+    ingredient = re.sub(r"\s+", " ", ingredient)
+    tokens = [w for w in ingredient.split() if w not in STOPWORDS]
+    return " ".join(tokens)
 
-    df['ingredients'] = df['ingredients'].apply(clean_text)
-    df['category'] = df['category'].str.lower().str.strip()
-    df['dish'] = df['dish'].str.lower().str.strip()
+def normalize_ingredients_list(ingredients) -> str:
+    if isinstance(ingredients, list):
+        return " ".join(normalize_ingredient(i) for i in ingredients)
+    return normalize_ingredient(str(ingredients))
 
+def preprocess_dataframe(df: pd.DataFrame) -> pd.DataFrame:
+    df = df.dropna(subset=["category", "ingredients", "dish"])
+    df["category"] = df["category"].str.lower().str.strip()
+    df["dish"] = df["dish"].str.lower().str.strip()
+    df["ingredients"] = df["ingredients"].apply(normalize_ingredients_list)
+    df = df.drop_duplicates()
+    df = df.reset_index(drop=True)
     return df
-
-if __name__ == "__main__":
-    df = load_and_preprocess("../data/dishes.csv")
-    print(df.head())

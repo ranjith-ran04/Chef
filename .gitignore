@@ -52,3 +52,7 @@ docker/tmp/
 Thumbs.db
 .vscode/
 .idea/
+
+# .gitignore
+artifacts/
+*.pkl

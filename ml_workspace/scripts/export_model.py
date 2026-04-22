@@ -1,25 +1,17 @@
-import shutil
+# ml_workspace/scripts/export_model.py
+
+import pickle
 import os
+import shutil
 
-SRC_DIR = "."
-DEST_DIR = "../artifacts"
+SRC = "backend/app/ml/artifacts"
+DST = "exports"
 
-files = [
-    "model.pkl",
-    "vectorizer.pkl",
-    "label_encoder.pkl"
-]
+def export_artifacts():
+    os.makedirs(DST, exist_ok=True)
+    for fname in ["model.pkl", "vectorizer.pkl", "label_encoder.pkl"]:
+        shutil.copy(f"{SRC}/{fname}", f"{DST}/{fname}")
+        print(f"Exported: {fname}")
 
-os.makedirs(DEST_DIR, exist_ok=True)
-
-for file in files:
-    src_path = os.path.join(SRC_DIR, file)
-    dest_path = os.path.join(DEST_DIR, file)
-
-    if not os.path.exists(src_path):
-        raise FileNotFoundError(f"{file} not found. Train model first.")
-
-    shutil.copy(src_path, dest_path)
-    print(f"✅ {file} exported to artifacts")
-
-print("🎉 All files exported successfully")
+if __name__ == "__main__":
+    export_artifacts()
