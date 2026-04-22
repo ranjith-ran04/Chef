@@ -1,6 +1,6 @@
 # backend/app/schemas/prediction_schema.py
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, validator # type: ignore
 from typing import List
 
 
@@ -29,12 +29,18 @@ class PredictionRequest(BaseModel):
 
 class RecommendationItem(BaseModel):
     dish: str
-    confidence: float = Field(..., ge=0, le=100, description="Confidence percentage 0–100")
+    confidence: float = Field(..., ge=0, le=100)
+
+
+class RecipeResponse(BaseModel):
+    ingredients: List[str]
+    steps: List[str]
 
 
 class PredictionResponse(BaseModel):
     best_match: str
     recommendations: List[RecommendationItem]
+    recipe: RecipeResponse
     explanation: str
 
     class Config:
@@ -46,7 +52,11 @@ class PredictionResponse(BaseModel):
                     {"dish": "shahi paneer", "confidence": 83.0},
                     {"dish": "kadai paneer", "confidence": 78.0},
                 ],
-                "explanation": "Based on the indian category and key ingredients like paneer, tomato, cream, the model strongly predicts 'paneer butter masala' as the best match with a confidence of 91.0%.",
+                "recipe": {
+                    "ingredients": ["paneer", "tomato", "cream", "butter"],
+                    "steps": ["Heat butter", "Add tomato puree", "Add paneer", "Finish with cream"],
+                },
+                "explanation": "Based on paneer, tomato, cream, the model strongly predicts 'paneer butter masala'.",
             }
         }
 

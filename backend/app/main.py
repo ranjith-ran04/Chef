@@ -2,8 +2,7 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from backend.app.api.v1.routes.prediction import router as prediction_router
-
+from app.api.v1.routes.prediction import router as prediction_router
 app = FastAPI(
     title="Dish Generator AI",
     description="AI-powered dish recommendation system",

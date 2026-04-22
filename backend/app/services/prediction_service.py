@@ -1,21 +1,15 @@
 # backend/app/services/prediction_service.py
 
 from typing import List
-from backend.app.ml.predict import predict_dish
-from backend.app.core.schemas.prediction_schema import PredictionResponse, RecommendationItem
+from app.ml.predict import predict_dish
+from app.core.schemas.prediction_schema import PredictionResponse, RecommendationItem, RecipeResponse
 import logging
 
 logger = logging.getLogger(__name__)
 
 
 class PredictionService:
-    def get_dish_prediction(
-        self, category: str, ingredients: List[str]
-    ) -> PredictionResponse:
-        """
-        Calls the ML prediction logic, validates results,
-        and returns a structured PredictionResponse.
-        """
+    def get_dish_prediction(self, category: str, ingredients: List[str]) -> PredictionResponse:
         try:
             raw = predict_dish(category=category, ingredients=ingredients)
         except RuntimeError as e:
@@ -30,12 +24,18 @@ class PredictionService:
             for r in raw.get("recommendations", [])
         ]
 
+        recipe_raw = raw.get("recipe", {"ingredients": [], "steps": []})
+        recipe = RecipeResponse(
+            ingredients=recipe_raw.get("ingredients", []),
+            steps=recipe_raw.get("steps", []),
+        )
+
         return PredictionResponse(
             best_match=raw["best_match"],
             recommendations=recommendations,
+            recipe=recipe,
             explanation=raw["explanation"],
         )
 
 
-# Singleton instance for dependency injection
 prediction_service = PredictionService()
